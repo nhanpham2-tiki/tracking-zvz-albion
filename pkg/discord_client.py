@@ -59,6 +59,9 @@ class DiscordClient(discord.Client):
             result = '{:<15} {:>8}\n'.format('Name', "Attend")
             for player_name, attend in player_attend.items():
                 result += "{:<20} {:>3}\n".format(player_name, attend)
+            
+            result += 'Total CTA: {}'.format(self.trackRepo.total_matches())
+
             await self.bot_log(message.channel, result)
             return
 

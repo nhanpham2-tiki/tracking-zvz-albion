@@ -37,6 +37,14 @@ class TrackRepo():
             player_attend[row[0]] = row[1]
         return player_attend
 
+    def total_matches(self):
+        cursor = self.conn.cursor()
+        cursor.execute("""SELECT COUNT( DISTINCT ATTEND_DATE ) 
+            AS "Number of CTA" 
+            FROM Attend;""")
+        record = cursor.fetchone()[0]
+        return record
+
     def __update_players__(self, players: List[str]):
         select_attend = """SELECT ATTEND FROM Player Where NAME = '{}'"""
         insert_attend = """INSERT OR IGNORE INTO Player (NAME, ATTEND) Values ('{name}', {attend})"""
