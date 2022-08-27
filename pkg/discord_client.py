@@ -56,7 +56,7 @@ class DiscordClient(discord.Client):
 
         if message.content.lower().startswith('!report'):
             player_attend = self.trackRepo.report_player()
-            result = ''
+            result = '{:<15} {:>8}\n'.format('Name', "Attend")
             for player_name, attend in player_attend.items():
                 result += "{:<20} {:>3}\n".format(player_name, attend)
             await self.bot_log(message.channel, result)
