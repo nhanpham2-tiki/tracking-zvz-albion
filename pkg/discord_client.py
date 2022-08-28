@@ -15,6 +15,7 @@ class DiscordClient(discord.Client):
         await channel.send(log)
 
     async def on_ready(self):
+        await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name="Chaos in GSW"))
         print(f'We have logged in as {self.user}')
 
     def isDev(self, message):
