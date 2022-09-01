@@ -2,7 +2,7 @@
 
 import os
 import discord
-from pkg import discord_client
+from pkg import discordClient
 from dotenv import load_dotenv
 
 if __name__ == '__main__':
@@ -11,5 +11,5 @@ if __name__ == '__main__':
     intents = discord.Intents.default()
     intents.message_content = True
 
-    client = discord_client.DiscordClient(intents=intents)
+    client = discordClient.DiscordClient(intents=intents)
     client.run(os.getenv('TOKEN'))

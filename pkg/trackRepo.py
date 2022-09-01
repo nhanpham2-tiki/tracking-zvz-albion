@@ -23,6 +23,9 @@ class TrackRepo():
             ATTEND_DATE     TEXT    NOT NULL)''')
         self.conn.commit()
 
+    '''
+    date format: '%Y-%m-%d' or '%Y-%m-%d %H:%M%S'
+    '''
     def update_attend(self, players: List[str], date: date):
         self.__update_players__(players)
         self.__update_log__(players, date)
