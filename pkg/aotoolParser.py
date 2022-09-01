@@ -1,7 +1,9 @@
-from typing import List
-import requests
 import ast
+from typing import List
+
+import requests
 from bs4 import BeautifulSoup
+
 from pkg.constant import ZVZ_API
 
 

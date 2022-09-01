@@ -1,7 +1,6 @@
 import os
-from ast import arg
-from typing import Any
 from datetime import datetime
+from typing import Any
 
 import discord
 
@@ -47,14 +46,16 @@ class DiscordClient(discord.Client):
                 parser = aoToolParser(time)
                 attend_players = parser.ParsePlayerAttend()
 
-                current_date = datetime.utcnow().replace(hour=time, minute=0, second=0, microsecond=0)
+                current_date = datetime.utcnow().replace(
+                    hour=time, minute=0, second=0, microsecond=0)
                 self.trackRepo.update_attend(
                     players=attend_players, date=current_date)
 
                 await self.bot_log(message.channel, "Done !")
-                
+
                 # Log after match
-                result_log = 'CTA Time: {}\n'.format(current_date.strftime('%Y-%m-%d %H:%M:%S'))
+                result_log = 'CTA Time: {}\n'.format(
+                    current_date.strftime('%Y-%m-%d %H:%M:%S'))
                 result_log += ("-" * 30 + '\n')
                 for player in attend_players:
                     result_log += (player + "\n")
@@ -67,14 +68,11 @@ class DiscordClient(discord.Client):
 
         # ! Report detail as excel
         if message.content.lower().startswith('!report'):
-            player_attend = self.trackRepo.report_player()
-            result = '{:<15} {:>8}\n'.format('Name', "Attend")
-            for player_name, attend in player_attend.items():
-                result += "{:<20} {:>3}\n".format(player_name, attend)
+            excelExport = HandlerExcel()
+            excelExport.ExportData(self.trackRepo)
 
-            result += 'Total CTA: {}'.format(self.trackRepo.total_matches())
-
-            await self.bot_log(message.channel, result)
+            file = discord.File(excelExport.fileName)
+            await message.channel.send(file=file, content="GSW Tracking")
             return
 
         if self.isDev(message):
@@ -102,7 +100,8 @@ class DiscordClient(discord.Client):
                     await self.bot_log(message.channel, "Wrong format: !add name yyyy-mm-dd hour")
                     return
 
-                current_date = date.replace(hour=hour, minute=0, second=0, microsecond=0)
+                current_date = date.replace(
+                    hour=hour, minute=0, second=0, microsecond=0)
                 attend_players = [args[1]]
                 self.trackRepo.update_attend(
                     players=attend_players, date=current_date)

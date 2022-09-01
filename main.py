@@ -1,9 +1,11 @@
 # https://discord.com/api/oauth2/authorize?client_id=893693054899347467&permissions=27917544512&scope=bot
 
 import os
+
 import discord
-from pkg import discordClient
 from dotenv import load_dotenv
+
+from pkg import discordClient
 
 if __name__ == '__main__':
     load_dotenv()

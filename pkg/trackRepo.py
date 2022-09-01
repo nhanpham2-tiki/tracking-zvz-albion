@@ -1,9 +1,6 @@
-from datetime import date
 import sqlite3
-import string
-from turtle import st
+from datetime import date
 from typing import List
-from unicodedata import name
 
 
 class TrackRepo():
@@ -26,6 +23,7 @@ class TrackRepo():
     '''
     date format: '%Y-%m-%d' or '%Y-%m-%d %H:%M%S'
     '''
+
     def update_attend(self, players: List[str], date: date):
         self.__update_players__(players)
         self.__update_log__(players, date)
@@ -47,6 +45,41 @@ class TrackRepo():
             FROM Attend;""")
         record = cursor.fetchone()[0]
         return record
+
+    def GetAllMatchTime(self) -> List[str]:
+        result = []
+
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT DISTINCT(ATTEND_DATE) from ATTEND')
+
+        rows = cursor.fetchall()
+        for row in rows:
+            result.append(row[0])
+        return result
+
+    def GetAllPlayersName(self) -> List[str]:
+        result = []
+
+        cursor = self.conn.cursor()
+        cursor.execute('SELECT NAME from PLAYER')
+
+        rows = cursor.fetchall()
+        for row in rows:
+            result.append(row[0])
+        return result
+
+    def GetAllDateOfPlayer(self, name: str) -> List[str]:
+        result = []
+
+        cursor = self.conn.cursor()
+        cursor.execute('''SELECT DISTINCT(ATTEND_DATE)
+            from ATTEND
+            where NAME = "{}"'''.format(name))
+
+        rows = cursor.fetchall()
+        for row in rows:
+            result.append(row[0])
+        return result
 
     def __update_players__(self, players: List[str]):
         select_attend = """SELECT ATTEND FROM Player Where NAME = '{}'"""
