@@ -11,6 +11,8 @@ Parse log &amp; Tracking CTA in Albion games
 
 Command only for admin (dev):
 ```
-!clear                      : Clear Data (new season)
+!clear_tracking             : Clear Data (new season)
+!export                     : Get Database file
 !add name yyyy-mm-dd hour   : Add missing case
+!reverse yyyy-mm-dd hour    : Delete all record at that datetime
 ```

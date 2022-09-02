@@ -15,11 +15,21 @@ class aoToolParser():
         else:
             self.min_players = 10
 
-    def ParsePlayerAttend(self) -> List[str]:
-        response = requests.get(ZVZ_API.format(
+        self.response = requests.get(ZVZ_API.format(
             player=self.min_players, start=self.CTA_time-1, end=self.CTA_time))
 
-        soup = BeautifulSoup(response.content, 'html.parser')
+    def ParseAllPlayer(self) -> List[str]:
+        soup = BeautifulSoup(self.response.content, 'html.parser')
+        div_players = soup.find('div', id='download').string
+        players = ast.literal_eval(div_players)
+
+        self.attend_player = []
+        for playerInfo in players:
+            self.attend_player.append(playerInfo[1])
+        return self.attend_player
+
+    def ParsePlayerAttend(self) -> List[str]:
+        soup = BeautifulSoup(self.response.content, 'html.parser')
         div_players = soup.find('div', id='download').string
         players = ast.literal_eval(div_players)
 

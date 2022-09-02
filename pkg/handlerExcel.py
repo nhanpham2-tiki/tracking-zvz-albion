@@ -1,3 +1,4 @@
+from typing import List
 import openpyxl
 import openpyxl.styles
 from openpyxl.utils.cell import get_column_letter
@@ -16,7 +17,7 @@ class HandlerExcel():
         self.fileName = 'GSW_Tracking.xlsx'
         self.workbook = openpyxl.Workbook()
 
-    def ExportData(self, trackRepo: TrackRepo):
+    def ExportData(self, trackRepo: TrackRepo, clone_list: List[str]):
         sheet = self.workbook.active
         # Title
         sheet.merge_cells('A1:AD1')
@@ -64,6 +65,14 @@ class HandlerExcel():
 
         # Checkmark attendance by row
         for idPlayer, player in enumerate(self.players_name):
+            # Clone acc
+            if player in clone_list:
+                for cell in sheet["{row}:{row}".format(row = START_CHECK_ROW + idPlayer)]:
+                    # Fill green
+                    cell.fill = openpyxl.styles.PatternFill(
+                        start_color='00007F00', end_color='00007F00', fill_type="solid")
+                continue
+
             allDate = trackRepo.GetAllDateOfPlayer(player)
             for date in allDate:
                 check_cell = sheet.cell(
@@ -74,7 +83,10 @@ class HandlerExcel():
             # Summarize attend over total CTA
             total_cell = sheet.cell(row=START_CHECK_ROW + idPlayer,
                                     column=START_CHECK_COL + self.total_CTA)
-            total_cell.value = "{} / {}".format(len(allDate), self.total_CTA)
+
+            percent_attend = (len(allDate) / self.total_CTA) * 100
+            total_cell.value = "{} / {} ({:.2f}%)".format(len(allDate),
+                                                        self.total_CTA, percent_attend)
             total_cell.alignment = center_align
             total_cell.font = openpyxl.styles.Font(size=14, bold=True)
             total_cell.fill = openpyxl.styles.PatternFill(
