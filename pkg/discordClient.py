@@ -1,5 +1,8 @@
+from ast import arg
 import os
 from datetime import datetime
+from pickle import TRUE
+from turtle import title
 from typing import Any
 
 import discord
@@ -45,50 +48,46 @@ class DiscordClient(discord.Client):
             await message.channel.send('Bot is running!')
             return
 
-        if message.content.lower().startswith('!checkin'):
-            args = message.content.lower().split()
-            if len(args) <= 1:
-                await self.bot_log(message.channel, "Missing CTA time")
-                return
-            try:
-                time = int(args[1])
-                parser = aoToolParser(time)
-                all_players = parser.ParseAllPlayer()
-                self.trackRepo.UpdateAllPlayer(players=all_players)
+        if message.content.lower().startswith('!cta player'):
+            args = message.content.split()
+            player_name = args[-1]
 
-                attend_players = parser.ParsePlayerAttend()
-                # Corner case: log at 2/9/2022 3utc for 1/9/2022 15utc
-                # Wrong input date: 2/9/2022 15utc
-                if datetime.utcnow().hour < time:
-                    current_date = datetime.utcnow()
-                    current_date = current_date.replace(
-                        day=current_date.day - 1, hour=time, minute=0, second=0, microsecond=0)
-                else:
-                    current_date = datetime.utcnow().replace(
-                        hour=time, minute=0, second=0, microsecond=0)
+            all_CTA_date = self.trackRepo.GetAllMatchTime()
+            allAttendDate = self.trackRepo.GetAllDateOfPlayer(player_name)
+            percent_attend = (len(allAttendDate) / len(all_CTA_date)) * 100
 
-                self.trackRepo.update_attend(
-                    players=attend_players, date=current_date)
+            msg_embed = discord.Embed(
+                title="[Golden Star Warriors] {}\'s card".format(player_name),
+                color=discord.Color.blue()
+            )
 
-                await self.bot_log(message.channel, "Done !")
+            report = "{} / {}    ({:.2f}%)".format(len(allAttendDate), len(all_CTA_date),
+                                                    percent_attend)
+            msg_embed.add_field(
+                name="Attend:",
+                value=report,
+                inline=False
+            )
 
-                # Log after match
-                result_log = 'CTA Time: {}\n'.format(
-                    current_date.strftime('%Y-%m-%d %H:%M:%S'))
-                result_log += ("-" * 30 + '\n')
-                for player in attend_players:
-                    result_log += (player + "\n")
-                result_log += ("-" * 30 + '\n')
-                result_log += ("Total attend: {}".format(len(attend_players)))
-                await self.bot_log(message.channel, result_log)
-            except Exception as err:
-                await self.bot_log(message.channel, "Error while parse data: {}".format(err))
-                return
+            report = ""
+            count = 0
+            while count <= 5 and count < len(allAttendDate):
+                report += (allAttendDate[count] + "\n")
+                count += 1
+
+            report = "```" + report + "```"
+            msg_embed.add_field(
+                name="Last 5 CTA:",
+                value=report,
+                inline=True
+            )
+            await message.channel.send(embed=msg_embed)
 
         # ! Report detail as excel
         if message.content.lower().startswith('!report'):
             excelExport = HandlerExcel()
-            excelExport.ExportData(trackRepo=self.trackRepo, clone_list=self.clone)
+            excelExport.ExportData(
+                trackRepo=self.trackRepo, clone_list=self.clone)
 
             file = discord.File(excelExport.fileName)
             await message.channel.send(file=file, content="GSW Tracking")
@@ -123,7 +122,7 @@ class DiscordClient(discord.Client):
                 await self.bot_log(message.channel, "Done !")
 
             # !add player_name date(yyyy-mm-dd) time(hh)
-            if message.content.lower().startswith('!add'):
+            if message.content.lower().startswith('!update'):
                 args = message.content.split()
                 if len(args) != 4:
                     await self.bot_log(message.channel, "Wrong format: !add name yyyy-mm-dd hour")
@@ -151,13 +150,69 @@ class DiscordClient(discord.Client):
                 await message.channel.send(file=file)
                 return
 
-            # if message.content.lower().startswith('!manual'):
-            #     if len(message.attachments) == 0:
-            #         await self.bot_log(message.channel, "Missing Excel Tracking file")
-            #         return
+            # * Checkin auto
+            if message.content.lower().startswith('!checkin'):
+                args = message.content.lower().split()
+                if len(args) <= 1:
+                    await self.bot_log(message.channel, "Missing CTA time")
+                    return
+                try:
+                    time = int(args[1])
+                    parser = aoToolParser(time)
+                    all_players = parser.ParseAllPlayer()
+                    self.trackRepo.UpdateAllPlayer(players=all_players)
 
-            #     attachment_name = message.attachments[0].filename
-            #     await message.attachments[0].save(attachment_name)
+                    attend_players = parser.ParsePlayerAttend()
+                    # Corner case: log at 2/9/2022 3utc for 1/9/2022 15utc
+                    # Wrong input date: 2/9/2022 15utc
+                    if datetime.utcnow().hour < time:
+                        current_date = datetime.utcnow()
+                        current_date = current_date.replace(
+                            day=current_date.day - 1, hour=time, minute=0, second=0, microsecond=0)
+                    else:
+                        current_date = datetime.utcnow().replace(
+                            hour=time, minute=0, second=0, microsecond=0)
+
+                    self.trackRepo.update_attend(
+                        players=attend_players, date=current_date)
+
+                    await self.bot_log(message.channel, "Done !")
+
+                    # Log after match
+                    msg_embed = discord.Embed(
+                        title='CTA Time: {}'.format(current_date.strftime('%Y-%m-%d %H:%M:%S')),
+                        description="[Golden Star Warriors] players join CTA", 
+                        color=discord.Color.blue()
+                    )
+
+                    msg_embed.add_field(
+                        name="Total attend:",
+                        value=len(attend_players),
+                        inline=False
+                    )
+
+                    result_log = ""
+                    for player in attend_players:
+                        result_log += (player + "\n")
+                    result_log = "```" + result_log + "```"
+                    msg_embed.add_field(
+                        name="Players:",
+                        value=result_log,
+                        inline=True
+                    )
+                    
+                    await message.channel.send(embed=msg_embed)
+                except Exception as err:
+                    await self.bot_log(message.channel, "Error while parse data: {}".format(err))
+                    return
+
+            if message.content.lower().startswith('!manual'):
+                if len(message.attachments) == 0:
+                    await self.bot_log(message.channel, "Missing Excel Tracking file")
+                    return
+
+                attachment_name = message.attachments[0].filename
+                await message.attachments[0].save(attachment_name)
 
             #     try:
             #         handlerExcel = HandlerExcel(attachment_name)

@@ -83,7 +83,8 @@ class TrackRepo():
         cursor = self.conn.cursor()
         cursor.execute('''SELECT DISTINCT(ATTEND_DATE)
             from ATTEND
-            where NAME = "{}"'''.format(name))
+            where NAME = "{}"
+            ORDER BY ATTEND_DATE DESC'''.format(name))
 
         rows = cursor.fetchall()
         for row in rows:
