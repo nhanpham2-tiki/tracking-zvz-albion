@@ -14,9 +14,9 @@ class aoToolParser():
     def __init__(self, CTA_time: int) -> None:
         self.CTA_time = CTA_time
         if self.CTA_time >= 10:
-            self.min_players = MIN_PLAYER_MORNING
-        else:
             self.min_players = MIN_PLAYER_EVENING
+        else:
+            self.min_players = MIN_PLAYER_MORNING
 
         self.response = requests.get(ZVZ_API.format(
             player=self.min_players, start=self.CTA_time-1, end=self.CTA_time))
