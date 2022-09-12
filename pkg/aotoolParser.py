@@ -6,14 +6,17 @@ from bs4 import BeautifulSoup
 
 from pkg.constant import ZVZ_API
 
+MIN_PLAYER_MORNING = 7
+MIN_PLAYER_EVENING = 15
+
 
 class aoToolParser():
     def __init__(self, CTA_time: int) -> None:
         self.CTA_time = CTA_time
         if self.CTA_time >= 10:
-            self.min_players = 15
+            self.min_players = MIN_PLAYER_MORNING
         else:
-            self.min_players = 10
+            self.min_players = MIN_PLAYER_EVENING
 
         self.response = requests.get(ZVZ_API.format(
             player=self.min_players, start=self.CTA_time-1, end=self.CTA_time))
