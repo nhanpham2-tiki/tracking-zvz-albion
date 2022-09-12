@@ -191,9 +191,9 @@ class DiscordClient(discord.Client):
                         inline=False
                     )
 
-                    result_log = ""
+                    result_log = "\n"
                     for player in attend_players:
-                        result_log += (player + "\n")
+                        result_log += "{}\n".format(player)
                     result_log = "```" + result_log + "```"
                     msg_embed.add_field(
                         name="Players:",
