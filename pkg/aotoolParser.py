@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 
 from pkg.constant import ZVZ_API
 
-MIN_PLAYER_MORNING = 7
-MIN_PLAYER_EVENING = 15
+MIN_PLAYER_MORNING = 5
+MIN_PLAYER_EVENING = 5
 
 
 class aoToolParser():
